@@ -17,8 +17,8 @@ const inter = Inter({
 
 // ✅ Static metadata (now supported again)
 export const metadata: Metadata = {
-  title: 'Boat Mech - Your Marine Parts Expert',
-  description: 'Find all your boat parts and accessories at Boat Mech.',
+  title: 'Boat Mech - Your Tool & Hardware Expert',
+  description: 'Find all your tools, generators, pumps, ladders, and hardware equipment at Boat Mech.',
 };
 
 export default function RootLayout({

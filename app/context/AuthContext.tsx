@@ -20,6 +20,7 @@ interface AuthContextType {
   login: (email: string, pass: string) => Promise<boolean>;
   signup: (email: string, pass: string, name: string) => Promise<boolean>;
   logout: () => void;
+  refreshUserClaims: () => Promise<void>;
   isLoading: boolean;
 }
 
@@ -34,6 +35,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
       setIsLoading(true);
       if (firebaseUser) {
+        // Get token result to check for custom claims (like admin role)
+        const tokenResult = await firebaseUser.getIdTokenResult(true); // Force refresh
+        const authRole = (tokenResult.claims.role as 'user' | 'admin') || 'user';
+        
         const userDocRef = doc(db, "users", firebaseUser.uid);
         const userDocSnap = await getDoc(userDocRef);
 
@@ -43,7 +48,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             id: firebaseUser.uid, 
             email: firebaseUser.email, 
             name: firestoreData.name || firebaseUser.displayName || firebaseUser.email?.split('@')[0],
-            role: firestoreData.role || 'user',
+            role: authRole, // Use role from Firebase Auth custom claims (takes precedence)
             createdAt: firestoreData.createdAt as Timestamp, // Cast, ensure it exists
             updatedAt: firestoreData.updatedAt as Timestamp | undefined,
           });
@@ -51,9 +56,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           // User exists in Firebase Auth but not in Firestore 'users' collection.
           // Create their profile in Firestore.
           const now = serverTimestamp();
-          const newUserProfile: Omit<AuthUserType, 'id' | 'email'> & {createdAt: any, updatedAt: any} = { // Use Omit for properties derived from firebaseUser
+          const newUserProfile = {
             name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || "New User",
-            role: 'user', // Default role
+            role: 'user' as const, // Default role
             createdAt: now,
             updatedAt: now,
           };
@@ -126,9 +131,33 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // setIsLoading(false); // onAuthStateChanged will set loading to false
     }
   };
+
+  const refreshUserClaims = async () => {
+    if (auth.currentUser) {
+      setIsLoading(true);
+      try {
+        // Force refresh the token to get updated claims
+        await auth.currentUser.getIdToken(true);
+        // Trigger a re-evaluation by calling the auth state change handler manually
+        const tokenResult = await auth.currentUser.getIdTokenResult(true);
+        const authRole = (tokenResult.claims.role as 'user' | 'admin') || 'user';
+        
+        if (user) {
+          setUser({
+            ...user,
+            role: authRole
+          });
+        }
+      } catch (error) {
+        console.error("Error refreshing user claims:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
   
   return (
-    <AuthContext.Provider value={{ user, login, signup, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, login, signup, logout, refreshUserClaims, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

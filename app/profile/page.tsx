@@ -48,7 +48,7 @@ export default function UserProfilePage() {
   return (
     <div className="max-w-2xl mx-auto py-8 px-4">
       <Card className="shadow-xl rounded-lg overflow-hidden">
-        <CardHeader className="text-center bg-muted/30 p-6 border-b">
+        <CardHeader className="text-center bg-gray-50 p-6 border-b">
           <div className="flex justify-center mb-4">
             <Avatar className="h-28 w-28 border-4 border-primary shadow-md">
               <AvatarImage 
@@ -76,7 +76,7 @@ export default function UserProfilePage() {
             {/* Add more user details here if available, e.g., member since */}
           </div>
         </CardContent>
-        <CardFooter className="flex flex-col sm:flex-row gap-3 p-6 border-t bg-muted/20">
+        <CardFooter className="flex flex-col sm:flex-row gap-3 p-6 border-t bg-gray-50">
           <Button variant="outline" className="w-full sm:w-auto" disabled> {/* Edit Profile is a future feature */}
             <Edit3 className="mr-2 h-4 w-4" /> Edit Profile
           </Button>

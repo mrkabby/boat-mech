@@ -1,0 +1,29 @@
+// Firestore Security Rules
+// Deploy these rules to your Firestore console
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Products - Read for all, write for admins only (check custom claims)
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if request.auth != null && 
+        request.auth.token.role == 'admin';
+    }
+    
+    // Users - Read/write own profile, admins can read all
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read: if request.auth != null && 
+        request.auth.token.role == 'admin';
+    }
+    
+    // Orders - Users can read/write their own orders
+    match /orders/{orderId} {
+      allow read, write: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+      allow read: if request.auth != null && 
+        request.auth.token.role == 'admin';
+    }
+  }
+}

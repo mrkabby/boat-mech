@@ -1,5 +1,5 @@
 // src/lib/firebaseAdmin.ts
-import * as admin from 'firebase-admin';
+import admin from 'firebase-admin';
 
 interface FirebaseAdminCredentials {
   projectId?: string;
@@ -7,56 +7,83 @@ interface FirebaseAdminCredentials {
   privateKey?: string;
 }
 
+// Add debugging to check if environment variables are loaded
+if (process.env.NODE_ENV !== 'production') {
+  console.log('Environment check:', {
+    hasProjectId: !!process.env.FIREBASE_ADMIN_PROJECT_ID,
+    hasClientEmail: !!process.env.FIREBASE_ADMIN_CLIENT_EMAIL,
+    hasPrivateKey: !!process.env.FIREBASE_ADMIN_PRIVATE_KEY,
+    nodeEnv: process.env.NODE_ENV
+  });
+}
+
 // Retrieve credentials from environment variables
 const adminCredentials: FirebaseAdminCredentials = {
   projectId: process.env.FIREBASE_ADMIN_PROJECT_ID,
   clientEmail: process.env.FIREBASE_ADMIN_CLIENT_EMAIL,
-  privateKey: process.env.FIREBASE_ADMIN_PRIVATE_KEY,
+  privateKey: process.env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, '\n'),
 };
 
 let adminApp: admin.app.App;
 let adminAuthService: admin.auth.Auth;
 let adminDbService: admin.firestore.Firestore;
 
-if (!admin.apps.length) {
-  const missingKeys = (Object.keys(adminCredentials) as Array<keyof FirebaseAdminCredentials>)
-    .filter(key => !adminCredentials[key]);
+try {
+  if (admin.apps.length === 0) {
+    const missingKeys = (Object.keys(adminCredentials) as Array<keyof FirebaseAdminCredentials>)
+      .filter(key => !adminCredentials[key]);
 
-  if (missingKeys.length > 0) {
-    const errorMessage = `Firebase Admin SDK initialization failed: Missing environment variables: ${missingKeys.join(', ')}. 
-    Please set these in your .env.local file. Refer to Firebase project service account JSON key.
-    For FIREBASE_ADMIN_PRIVATE_KEY, ensure newlines are correctly formatted (e.g., use '\\n' in .env.local).`;
+    if (missingKeys.length > 0) {
+      const errorMessage = `Firebase Admin SDK initialization failed: Missing environment variables: ${missingKeys.join(', ')}. 
+      Please set these in your .env.local file. Refer to Firebase project service account JSON key.
+      For FIREBASE_ADMIN_PRIVATE_KEY, ensure newlines are correctly formatted (e.g., use '\\n' in .env.local).
+      
+      Current values:
+      - FIREBASE_ADMIN_PROJECT_ID: ${adminCredentials.projectId ? 'SET' : 'MISSING'}
+      - FIREBASE_ADMIN_CLIENT_EMAIL: ${adminCredentials.clientEmail ? 'SET' : 'MISSING'}  
+    - FIREBASE_ADMIN_PRIVATE_KEY: ${adminCredentials.privateKey ? 'SET' : 'MISSING'}`;
+    
     console.error(errorMessage);
-    // In a real production app, you might want to prevent the app from starting or gracefully degrade.
-    // For now, we throw to make the configuration issue explicit.
-    throw new Error(errorMessage);
+    
+    // For development, we'll throw an error to make it clear what's missing
+    if (process.env.NODE_ENV !== 'production') {
+      throw new Error(errorMessage);
+    }
+    
+    // In production, you might want to handle this differently
+    throw new Error('Firebase Admin SDK configuration is incomplete');
   }
 
   try {
+    console.log('Attempting to initialize Firebase Admin SDK...');
+    
     adminApp = admin.initializeApp({
       credential: admin.credential.cert({
         projectId: adminCredentials.projectId!,
         clientEmail: adminCredentials.clientEmail!,
-        privateKey: adminCredentials.privateKey!.replace(/\\n/g, '\n'),
+        privateKey: adminCredentials.privateKey!,
       }),
-      // If you use Firebase Realtime Database, you might need this:
-      // databaseURL: `https://${adminCredentials.projectId}.firebaseio.com`,
     });
+    
     adminAuthService = adminApp.auth();
     adminDbService = adminApp.firestore();
-    if (process.env.NODE_ENV !== 'production') {
-        console.log('Firebase Admin SDK initialized successfully.');
-    }
+    
+    console.log('✅ Firebase Admin SDK initialized successfully');
   } catch (error: any) {
     const initErrorMessage = 'Firebase Admin SDK initialization error: ' + (error.message || error);
-    console.error(initErrorMessage, error.stack);
-    throw new Error(initErrorMessage); // Rethrow to indicate critical failure
+    console.error('❌ Firebase Admin SDK initialization failed:', initErrorMessage);
+    console.error('Error details:', error);
+    throw new Error(initErrorMessage);
   }
 } else {
   // Already initialized
   adminApp = admin.apps[0]!;
   adminAuthService = adminApp.auth();
   adminDbService = adminApp.firestore();
+}
+} catch (globalError: any) {
+  console.error('❌ Critical Firebase Admin SDK error:', globalError);
+  throw new Error(`Firebase Admin SDK failed to initialize: ${globalError.message}`);
 }
 
 export const adminAuth = adminAuthService;

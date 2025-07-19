@@ -25,6 +25,7 @@ import { Loader2 } from "lucide-react";
 import type { NewProduct, Product } from "../../types";
 import { addProduct } from "../../data/products";
 import { productCategories } from "../../lib/constants/products";
+import { CloudinaryUpload } from "../ui/cloudinary-upload";
 
 
 const productFormSchema = z.object({
@@ -32,7 +33,8 @@ const productFormSchema = z.object({
   description: z.string().min(10, { message: "Description must be at least 10 characters." }),
   price: z.coerce.number().positive({ message: "Price must be a positive number." }),
   category: z.string().min(1, { message: "Category is required." }),
-  imageUrl: z.string().url({ message: "Please enter a valid image URL." }),
+  imageUrl: z.string().min(1, { message: "Please upload an image." }),
+  cloudinaryPublicId: z.string().optional(),
   imageHint: z.string()
     .min(1, { message: "Image hint is required." })
     .refine(value => value.split(" ").filter(Boolean).length <= 2, {
@@ -67,8 +69,9 @@ export function ProductForm({
       description: "",
       price: 0,
       category: "",
-      imageUrl: "https://placehold.co/600x400.png",
-      imageHint: "placeholder image",
+      imageUrl: "",
+      cloudinaryPublicId: "",
+      imageHint: "",
       stock: 0,
     },
   });
@@ -124,7 +127,7 @@ export function ProductForm({
                 <FormItem>
                   <FormLabel>Product Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., Marine Grade Bilge Pump" {...field} />
+                    <Input placeholder="e.g., Cordless Drill Set" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -208,12 +211,24 @@ export function ProductForm({
               name="imageUrl"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Image URL</FormLabel>
+                  <FormLabel>Product Image</FormLabel>
                   <FormControl>
-                    <Input placeholder="https://example.com/image.jpg" {...field} />
+                    <CloudinaryUpload
+                      value={field.value}
+                      onChange={(url, publicId) => {
+                        field.onChange(url);
+                        form.setValue('cloudinaryPublicId', publicId || '');
+                      }}
+                      onRemove={() => {
+                        field.onChange('');
+                        form.setValue('cloudinaryPublicId', '');
+                      }}
+                      disabled={isLoading}
+                      folder="products"
+                    />
                   </FormControl>
                   <FormDescription>
-                    Enter the full URL for the product image.
+                    Upload a high-quality image of the product. Maximum file size: 5MB.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -227,17 +242,17 @@ export function ProductForm({
                 <FormItem>
                   <FormLabel>Image Hint</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., red boat" {...field} />
+                    <Input placeholder="e.g., power drill" {...field} />
                   </FormControl>
                   <FormDescription>
-                    One or two keywords for AI image search (e.g., "boat engine").
+                    One or two keywords for AI image search (e.g., "power drill").
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button type="submit" className="w-full bg-green-600 hover:bg-green-700 text-white cursor-pointer" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {initialData ? "Update Product" : "Add Product"}
             </Button>

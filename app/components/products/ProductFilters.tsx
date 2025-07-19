@@ -31,7 +31,7 @@ export function ProductFilters({
             <Input
               id="search-product"
               type="text"
-              placeholder="e.g., Engine, GPS, Life Vest..."
+              placeholder="e.g., Drill, Generator, Ladder..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"

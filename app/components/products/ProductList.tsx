@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from 'react';
-import type { Product } from '../../types/index';
+import type { SerializedProduct } from '../../types/index';
 import { ProductCard } from './ProductCard';
 import { ProductFilters } from './ProductFilters';
 import { getProducts } from '../../lib/server/products'; // Using getProducts which fetches from Firestore
@@ -10,7 +10,7 @@ import { Loader2 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 
 export function ProductList() {
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<SerializedProduct[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");

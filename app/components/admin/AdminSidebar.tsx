@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, PlusSquare, LayoutDashboard, ListOrdered, Users, DollarSign, Package } from 'lucide-react';
+import { Home, PlusSquare, LayoutDashboard, Users, DollarSign, Package } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { Button } from '../../components/ui/button';
 import { Logo } from '../../components/Logo';
@@ -21,7 +21,7 @@ export function AdminSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-64 h-screen flex flex-col border-r bg-card text-card-foreground p-4 sticky top-0">
+    <aside className="w-64 h-screen flex flex-col border-r bg-white text-gray-900 p-4 sticky top-0 shadow-sm">
       <div className="py-2 mb-4">
         <Logo />
       </div>
@@ -30,10 +30,10 @@ export function AdminSidebar() {
         {adminNavItems.map((item) => (
           <Button
             key={item.href}
-            variant={pathname === item.href ? 'secondary' : 'ghost'}
+            variant={pathname === item.href ? 'default' : 'ghost'}
             className={cn(
               "w-full justify-start",
-              pathname === item.href && "font-semibold"
+              pathname === item.href && "font-semibold text-white"
             )}
             asChild
           >

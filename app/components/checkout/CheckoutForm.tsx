@@ -12,8 +12,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+} from "../ui/form";
+import { Input } from "../ui/input";
 import {
   Card,
   CardContent,
@@ -21,9 +21,9 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { useCart } from "@/context/CartContext";
-import { useToast } from "@/hooks/use-toast";
+} from "../ui/card";
+import { useCart } from "../../context/CartContext";
+import { useToast } from "../../hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Loader2, CreditCard, CheckCircle, AlertCircle } from "lucide-react";
@@ -119,7 +119,7 @@ export function CheckoutForm() {
           <CardDescription>You need items in your cart to proceed to checkout.</CardDescription>
         </CardHeader>
         <CardContent>
-          <Button onClick={() => router.push('/')} className="w-full bg-primary hover:bg-primary/90">
+          <Button onClick={() => router.push('/')} className="w-full bg-blue-600 hover:bg-blue-700 text-white cursor-pointer">
             Continue Shopping
           </Button>
         </CardContent>
@@ -134,7 +134,7 @@ export function CheckoutForm() {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <Card className="shadow-lg rounded-lg overflow-hidden">
-              <CardHeader className="bg-muted/30">
+              <CardHeader className="bg-gray-50">
                 <CardTitle className="text-xl">Shipping Information</CardTitle>
                 <CardDescription>
                   Enter your shipping address.
@@ -245,7 +245,7 @@ export function CheckoutForm() {
             </Card>
 
             <Card className="shadow-lg rounded-lg overflow-hidden">
-              <CardHeader className="bg-muted/30">
+              <CardHeader className="bg-gray-50">
                 <CardTitle className="text-xl">Payment Details</CardTitle>
                 <CardDescription>
                   Enter your payment information. This is a mock payment for
@@ -302,7 +302,7 @@ export function CheckoutForm() {
 
             <Button
               type="submit"
-              className="w-full bg-accent hover:bg-accent/90 text-accent-foreground text-lg py-6 mt-6 rounded-md shadow-md"
+              className="w-full bg-green-600 hover:bg-green-700 text-white cursor-pointer text-lg py-6 mt-6 rounded-md shadow-md"
               disabled={isProcessing || getItemCount() === 0}
             >
               {isProcessing ? (
@@ -323,7 +323,7 @@ export function CheckoutForm() {
 
       <div className="lg:col-span-1">
         <Card className="shadow-lg rounded-lg sticky top-24">
-          <CardHeader className="bg-muted/30">
+          <CardHeader className="bg-gray-50">
             <CardTitle className="text-xl">Order Summary</CardTitle>
             <CardDescription>
               You have {getItemCount()} item(s) in your cart.
@@ -347,7 +347,7 @@ export function CheckoutForm() {
               </div>
             ))}
           </CardContent>
-          <CardFooter className="flex justify-between items-center text-lg font-bold border-t pt-4 mt-4 bg-muted/20">
+          <CardFooter className="flex justify-between items-center text-lg font-bold border-t pt-4 mt-4 bg-gray-50">
             <span>Total:</span>
             <span>${getCartTotal().toFixed(2)}</span>
           </CardFooter>

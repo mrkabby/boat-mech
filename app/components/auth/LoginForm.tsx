@@ -22,6 +22,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../../hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import { getAuth, onAuthStateChanged } from "firebase/auth"; 
 
 const formSchema = z.object({
   email: z.string().email({ message: "Invalid email address." }),
@@ -46,10 +47,24 @@ export function LoginForm() {
     setIsLoading(true);
     const success = await login(values.email, values.password);
     setIsLoading(false);
-    if (success) {
-      toast({ title: "Login Successful", description: "Welcome back!" });
-      router.push("/");
+   if (success) {
+  toast({ title: "Login Successful", description: "Welcome back!" });
+
+  // 🔁 Wait for Firebase to emit the current user
+  const auth = getAuth();
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      const token = await user.getIdToken(true);
+      console.log("✅ Firebase ID Token:", token);
     } else {
+      console.error("❌ Still no authenticated user after state change.");
+    }
+  });
+
+  router.push("/");
+}
+
+   else {
       toast({
         title: "Login Failed",
         description: "Invalid email or password. Please try again.",
@@ -96,7 +111,7 @@ export function LoginForm() {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground" disabled={isLoading}>
+            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white cursor-pointer" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Log In
             </Button>
@@ -106,7 +121,7 @@ export function LoginForm() {
       <CardFooter className="flex flex-col items-center space-y-2">
         <p className="text-sm text-muted-foreground">
           Don&apos;t have an account?{" "}
-          <Button variant="link" asChild className="text-accent p-0 h-auto">
+          <Button variant="link" asChild className="text-blue-600 p-0 h-auto cursor-pointer">
             <Link href="/signup">Sign up</Link>
           </Button>
         </p>

@@ -17,7 +17,7 @@ export default function CartPage() {
         <ShoppingCart className="h-24 w-24 text-muted-foreground mb-6" />
         <h1 className="text-3xl font-bold text-primary mb-4">Your Cart is Empty</h1>
         <p className="text-muted-foreground mb-8">Looks like you haven&apos;t added anything to your cart yet.</p>
-        <Button asChild size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground">
+        <Button asChild size="lg" className="bg-blue-600 hover:bg-blue-700 text-white cursor-pointer">
           <Link href="/">Start Shopping</Link>
         </Button>
       </div>
@@ -38,14 +38,14 @@ export default function CartPage() {
           ))}
         </CardContent>
         <CardFooter className="flex flex-col md:flex-row items-center justify-between p-6 border-t mt-4 space-y-4 md:space-y-0">
-          <Button variant="outline" onClick={clearCart} className="w-full md:w-auto text-destructive border-destructive hover:bg-destructive/10">
+          <Button variant="outline" onClick={clearCart} className="w-full md:w-auto text-red-600 border-red-600 hover:bg-red-50 cursor-pointer">
             Clear Cart
           </Button>
           <div className="text-right w-full md:w-auto">
             <p className="text-2xl font-bold text-primary">
               Total: ${getCartTotal().toFixed(2)}
             </p>
-            <Button size="lg" asChild className="w-full md:w-auto mt-4 bg-accent hover:bg-accent/90 text-accent-foreground">
+            <Button size="lg" asChild className="w-full md:w-auto mt-4 bg-green-600 hover:bg-green-700 text-white cursor-pointer">
               <Link href="/checkout">Proceed to Checkout</Link>
             </Button>
           </div>

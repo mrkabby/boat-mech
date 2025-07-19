@@ -130,7 +130,7 @@ export function SignupForm() {
             />
             <Button 
               type="submit" 
-              className="w-full bg-accent hover:bg-accent/90 text-accent-foreground" 
+              className="w-full bg-green-600 hover:bg-green-700 text-white cursor-pointer" 
               disabled={isLoading}
               suppressHydrationWarning={true}
             >
@@ -143,7 +143,7 @@ export function SignupForm() {
       <CardFooter className="flex flex-col items-center space-y-2">
         <p className="text-sm text-muted-foreground">
           Already have an account?{" "}
-          <Button variant="link" asChild className="text-accent p-0 h-auto">
+          <Button variant="link" asChild className="text-blue-600 p-0 h-auto cursor-pointer">
             <Link href="/login">Log in</Link>
           </Button>
         </p>

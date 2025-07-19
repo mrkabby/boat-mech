@@ -3,12 +3,12 @@
 
 import type { ReactNode } from 'react';
 import { createContext, useContext, useState, useEffect } from 'react';
-import type { CartItem, Product } from '../types/index';
+import type { CartItem, BaseProduct } from '../types/index';
 import { useToast } from '../hooks/use-toast';
 
 interface CartContextType {
   cartItems: CartItem[];
-  addToCart: (product: Product, quantity?: number) => void;
+  addToCart: (product: BaseProduct, quantity?: number) => void;
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
@@ -52,7 +52,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [cartItems, isLoading]);
 
-  const addToCart = (product: Product, quantityToAdd: number = 1) => {
+  const addToCart = (product: BaseProduct, quantityToAdd: number = 1) => {
     setCartItems(prevItems => {
       const existingItem = prevItems.find(item => item.id === product.id);
       if (existingItem) {

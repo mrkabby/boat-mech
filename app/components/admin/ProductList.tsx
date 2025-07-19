@@ -2,15 +2,15 @@
 "use client";
 
 import { useState, useMemo, useEffect } from 'react';
-import type { Product } from '../../types';
+import type { SerializedProduct } from '../../types';
 import { ProductCard } from '../products/ProductCard';
 import { ProductFilters } from '../products/ProductFilters';
-import { getProducts } from '../../data/products'; // Using getProducts which fetches from Firestore
+import { getProducts } from '../../lib/server/products'; // Fixed import path
 import { Loader2 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "../../components/ui/alert";
 
 export function ProductList() {
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<SerializedProduct[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");

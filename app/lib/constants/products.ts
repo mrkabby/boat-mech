@@ -1,9 +1,12 @@
 export const productCategories: string[] = [
-  'Engines',
-  'Electronics',
-  'Safety Gear',
+  'Generators',
+  'Pumps',
+  'Ladders',
+  'Hand Tools',
+  'Power Tools',
+  'Safety Equipment',
+  'Hardware',
   'Maintenance',
-  'Accessories',
 ];
 
 export const sampleCategories: string[] = ['All', ...productCategories];

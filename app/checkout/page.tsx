@@ -1,15 +1,13 @@
 
 "use client";
 
-import type { ReactNode } from 'react';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
-import { useCart } from '@/context/CartContext';
+import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 import { Loader2, ShoppingCart } from 'lucide-react';
-import { CheckoutForm } from '@/components/checkout/CheckoutForm';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CheckoutForm } from '../components/checkout/CheckoutForm';
+import { Button } from '../components/ui/button';
 import Link from 'next/link';
 
 // Metadata for client components should be handled differently,
@@ -60,7 +58,7 @@ export default function CheckoutPage() {
         <p className="text-muted-foreground mb-8">
           You need to add items to your cart before you can checkout.
         </p>
-        <Button asChild size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground">
+        <Button asChild size="lg" className="bg-blue-600 hover:bg-blue-700 text-white cursor-pointer">
           <Link href="/">Start Shopping</Link>
         </Button>
       </div>
