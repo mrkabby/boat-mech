@@ -34,7 +34,7 @@ export function AddToCartButton({ product, disabled = false }: AddToCartButtonPr
       
       // Reset quantity after adding
       setQuantity(1);
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "Failed to add item to cart. Please try again.",

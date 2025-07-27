@@ -4,8 +4,6 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { AppProviders } from './components/Providers';
-import { Navbar } from './components/common/Navbar';
-import { Footer } from './components/common/Footer';
 import { cn } from './lib/utils';
 import { ConditionalLayout } from './components/ConditionalLayout';
 

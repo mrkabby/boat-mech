@@ -245,7 +245,7 @@ export function ProductForm({
                     <Input placeholder="e.g., power drill" {...field} />
                   </FormControl>
                   <FormDescription>
-                    One or two keywords for AI image search (e.g., "power drill").
+                    One or two keywords for AI image search (e.g., &quot;power drill&quot;).
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

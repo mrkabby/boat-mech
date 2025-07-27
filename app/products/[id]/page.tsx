@@ -1,23 +1,22 @@
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import { getProductById } from '../../lib/server/products';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
 import { Separator } from '../../components/ui/separator';
-import { Star, ShoppingCart, Package, Truck, Shield, ArrowLeft } from 'lucide-react';
+import { Star, Package, Truck, Shield, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { AddToCartButton } from '../../components/products/AddToCartButton';
 import type { Metadata } from 'next';
 
-interface ProductPageProps {
-  params: {
-    id: string;
-  };
-}
-
-export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
-  const product = await getProductById(params.id);
+export async function generateMetadata({ 
+  params 
+}: { 
+  params: Promise<{ id: string }> 
+}): Promise<Metadata> {
+  const { id } = await params;
+  const product = await getProductById(id);
   
   if (!product) {
     return {
@@ -37,8 +36,13 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
   };
 }
 
-export default async function ProductPage({ params }: ProductPageProps) {
-  const product = await getProductById(params.id);
+export default async function ProductPage({ 
+  params 
+}: { 
+  params: Promise<{ id: string }> 
+}) {
+  const { id } = await params;
+  const product = await getProductById(id);
 
   if (!product) {
     notFound();

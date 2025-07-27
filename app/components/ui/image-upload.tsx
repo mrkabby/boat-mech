@@ -112,7 +112,7 @@ export default function ImageUpload({
         title: "Success",
         description: "Image removed successfully!",
       });
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "Failed to remove image",

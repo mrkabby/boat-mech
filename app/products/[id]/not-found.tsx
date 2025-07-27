@@ -13,12 +13,12 @@ export default function ProductNotFound() {
           </div>
           <CardTitle className="text-2xl">Product Not Found</CardTitle>
           <CardDescription>
-            The product you're looking for doesn't exist or may have been removed.
+            The product you&apos;re looking for doesn&apos;t exist or may have been removed.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-gray-600">
-            Don't worry! You can browse our other great products or return to the homepage.
+            Don&apos;t worry! You can browse our other great products or return to the homepage.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Button variant="outline" asChild>
