@@ -10,13 +10,9 @@ import { CheckoutForm } from '../components/checkout/CheckoutForm';
 import { Button } from '../components/ui/button';
 import Link from 'next/link';
 
-// Metadata for client components should be handled differently,
-// e.g. using a custom hook or directly setting document.title in useEffect.
-// For simplicity, we'll set title in RootLayout or rely on a default.
-
 export default function CheckoutPage() {
   const { user, isLoading: authLoading } = useAuth();
-  const { getItemCount, isLoading: cartLoading } = useCart(); // Assuming cart might have a loading state
+  const { getItemCount, isLoading: cartLoading } = useCart();
   const router = useRouter();
 
   useEffect(() => {
@@ -29,23 +25,20 @@ export default function CheckoutPage() {
     document.title = "Checkout - Boat Mech";
   }, []);
 
-
-  if (authLoading || cartLoading) { // Check both auth and cart loading
+  if (authLoading || cartLoading) {
     return (
       <div className="flex flex-col min-h-[calc(100vh-10rem)] items-center justify-center text-center py-12">
-        <Loader2 className="h-16 w-16 animate-spin text-primary mb-4" />
-        <p className="text-lg text-muted-foreground">Loading checkout...</p>
+        <Loader2 className="h-16 w-16 animate-spin text-black mb-4" />
+        <p className="text-lg text-gray-600">Loading checkout...</p>
       </div>
     );
   }
 
   if (!user) {
-    // This case should ideally be caught by the redirect effect,
-    // but as a fallback during quick state transitions.
-     return (
+    return (
       <div className="flex flex-col min-h-[calc(100vh-10rem)] items-center justify-center text-center py-12">
-        <Loader2 className="h-16 w-16 animate-spin text-primary mb-4" />
-        <p className="text-lg text-muted-foreground">Redirecting to login...</p>
+        <Loader2 className="h-16 w-16 animate-spin text-black mb-4" />
+        <p className="text-lg text-gray-600">Redirecting to login...</p>
       </div>
     );
   }
@@ -53,29 +46,24 @@ export default function CheckoutPage() {
   if (getItemCount() === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
-        <ShoppingCart className="h-24 w-24 text-muted-foreground mb-6" />
-        <h1 className="text-3xl font-bold text-primary mb-4">Your Cart is Empty</h1>
-        <p className="text-muted-foreground mb-8">
+        <ShoppingCart className="h-24 w-24 text-gray-400 mb-6" />
+        <h1 className="text-3xl font-bold text-black mb-4">Your Cart is Empty</h1>
+        <p className="text-gray-600 mb-8">
           You need to add items to your cart before you can checkout.
         </p>
-        <Button asChild size="lg" className="bg-blue-600 hover:bg-blue-700 text-white cursor-pointer">
-          <Link href="/">Start Shopping</Link>
+        <Button asChild size="lg" className="bg-black hover:bg-gray-800 text-white cursor-pointer">
+          <Link href="/shop">Start Shopping</Link>
         </Button>
       </div>
     );
   }
 
-
   return (
-    <div className="max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-      <header className="mb-10 text-center">
-        <h1 className="text-4xl font-bold tracking-tight text-primary sm:text-5xl">
-          Secure Checkout
-        </h1>
-        <p className="mt-3 text-lg text-muted-foreground max-w-2xl mx-auto">
-          Complete your order by providing your shipping and payment details below.
-        </p>
-      </header>
+    <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-black mb-2">Checkout</h1>
+        <p className="text-gray-600">Complete your order securely</p>
+      </div>
       <CheckoutForm />
     </div>
   );

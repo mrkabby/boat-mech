@@ -1,356 +1,423 @@
-
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-import { Button } from "../ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "../ui/form";
-import { Input } from "../ui/input";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "../ui/card";
-import { useCart } from "../../context/CartContext";
-import { useToast } from "../../hooks/use-toast";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { Loader2, CreditCard, CheckCircle, AlertCircle } from "lucide-react";
-// ShippingAddress type will be imported from '@/types' if it's defined there.
-// For now, schema defines the structure.
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '../../context/AuthContext';
+import { useCart } from '../../context/CartContext';
+import { useToast } from '../../hooks/use-toast';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
+import { Textarea } from '../ui/textarea';
+import { Separator } from '../ui/separator';
+import { 
+  Loader2, 
+  MapPin, 
+  CreditCard, 
+  Edit,
+  Package,
+  Truck,
+  User,
+  Phone
+} from 'lucide-react';
 
-const checkoutFormSchema = z.object({
-  fullName: z.string().min(2, "Full name is required."),
-  addressLine1: z.string().min(5, "Address line 1 is required."),
-  addressLine2: z.string().optional(),
-  city: z.string().min(2, "City is required."),
-  postalCode: z
-    .string()
-    .min(3, "Postal code is required.")
-    .regex(/^\d{5}(-\d{4})?$/, "Enter a valid US postal code (e.g., 12345 or 12345-6789)."),
-  country: z.string().min(2, "Country is required."),
-  phoneNumber: z.string().optional().refine(val => !val || /^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$/.test(val), "Enter a valid phone number."),
-  cardNumber: z
-    .string()
-    .min(15, "Card number must be 15-16 digits.")
-    .max(19, "Card number must be 15-16 digits.") // Allowing for spaces
-    .refine(
-      (val) => /^\d{4}\s?\d{4}\s?\d{4}\s?\d{3,4}$/.test(val.replace(/\s/g, '')) || /^\d{15,16}$/.test(val.replace(/\s/g, '')), // Accepts with or without spaces
-      "Enter a valid 15 or 16-digit card number."
-    ),
-  expiryDate: z
-    .string()
-    .regex(/^(0[1-9]|1[0-2])\/?([0-9]{4}|[0-9]{2})$/, "Enter MM/YY or MM/YYYY."),
-  cvc: z
-    .string()
-    .min(3, "CVC must be 3-4 digits.")
-    .max(4, "CVC must be 3-4 digits.")
-    .regex(/^\d{3,4}$/, "Enter a valid CVC (3 or 4 digits)."),
-});
+declare global {
+  interface Window {
+    PaystackPop: {
+      setup: (config: {
+        key: string;
+        email: string;
+        amount: number;
+        currency: string;
+        firstname?: string;
+        lastname?: string;
+        phone?: string;
+        metadata?: Record<string, unknown>;
+        callback: (response: { reference: string }) => void;
+        onClose: () => void;
+      }) => {
+        openIframe: () => void;
+      };
+    };
+  }
+}
 
-type CheckoutFormValues = z.infer<typeof checkoutFormSchema>;
+interface DeliveryDetails {
+  fullName: string;
+  phone: string;
+  gpsAddress: string;
+  landmark: string;
+  area: string;
+  city: string;
+  region: string;
+  additionalDirections: string;
+}
 
 export function CheckoutForm() {
-  const { cartItems, getCartTotal, clearCart, getItemCount } = useCart();
+  const { user } = useAuth();
+  const { cartItems, getCartTotal, clearCart } = useCart();
   const { toast } = useToast();
   const router = useRouter();
-  const [isProcessing, setIsProcessing] = useState(false);
-
-  const form = useForm<CheckoutFormValues>({
-    resolver: zodResolver(checkoutFormSchema),
-    defaultValues: {
-      fullName: "",
-      addressLine1: "",
-      addressLine2: "",
-      city: "",
-      postalCode: "",
-      country: "United States", // Default country
-      phoneNumber: "",
-      cardNumber: "",
-      expiryDate: "",
-      cvc: "",
-    },
+  
+  const [isLoading, setIsLoading] = useState(false);
+  const [deliveryDetails, setDeliveryDetails] = useState<DeliveryDetails>({
+    fullName: user?.name || '',
+    phone: '',
+    gpsAddress: '',
+    landmark: '',
+    area: '',
+    city: '',
+    region: 'Greater Accra',
+    additionalDirections: ''
   });
+  const [editingAddress, setEditingAddress] = useState(false);
+  const [hasProfileAddress, setHasProfileAddress] = useState(false);
 
-  async function onSubmit(values: CheckoutFormValues) {
-    setIsProcessing(true);
-    await new Promise((resolve) => setTimeout(resolve, 2000)); // Simulate API call
+  useEffect(() => {
+    // Load Paystack script
+    const script = document.createElement('script');
+    script.src = 'https://js.paystack.co/v1/inline.js';
+    script.async = true;
+    document.body.appendChild(script);
 
-    const paymentSuccessful = Math.random() > 0.1; // 90% success rate for demo
+    return () => {
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
+    };
+  }, []);
 
-    if (paymentSuccessful) {
-      clearCart();
-      toast({
-        title: "Order Placed Successfully!",
-        description: "Thank you for your purchase. Your items are on their way.",
-        action: <CheckCircle className="text-green-500 h-6 w-6" />,
-      });
-      router.push("/");
-    } else {
-      toast({
-        title: "Payment Failed",
-        description:
-          "There was an issue processing your payment. Please check your details and try again.",
-        variant: "destructive",
-        action: <AlertCircle className="text-white h-6 w-6" />,
-      });
+  useEffect(() => {
+    const checkProfileAddress = async () => {
+      try {
+        const savedAddress = localStorage.getItem(`delivery_${user?.email}`);
+        if (savedAddress) {
+          const parsed = JSON.parse(savedAddress);
+          setDeliveryDetails(prev => ({
+            ...prev,
+            ...parsed
+          }));
+          setHasProfileAddress(true);
+        } else {
+          setEditingAddress(true);
+        }
+      } catch (error) {
+        console.error('Error loading profile address:', error);
+        setEditingAddress(true);
+      }
+    };
+
+    if (user) {
+      checkProfileAddress();
     }
-    setIsProcessing(false);
-  }
+  }, [user]);
 
-  if (getItemCount() === 0 && !isProcessing) {
-    // This check is important. If cart is empty, don't show form.
-    // Could redirect from page level too.
-     return (
-      <Card className="shadow-lg">
-        <CardHeader>
-          <CardTitle className="text-2xl">Your Cart is Empty</CardTitle>
-          <CardDescription>You need items in your cart to proceed to checkout.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button onClick={() => router.push('/')} className="w-full bg-blue-600 hover:bg-blue-700 text-white cursor-pointer">
-            Continue Shopping
-          </Button>
-        </CardContent>
-      </Card>
-    );
-  }
+  const handlePayment = async () => {
+    if (!deliveryDetails.fullName || !deliveryDetails.phone || !deliveryDetails.city) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required delivery details.",
+        variant: "destructive",
+      });
+      return;
+    }
 
+    if (!window.PaystackPop) {
+      toast({
+        title: "Payment Error",
+        description: "Payment system is not available. Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+
+    const totalAmount = (getCartTotal() + 15) * 100; // Paystack expects amount in kobo
+    
+    const handler = window.PaystackPop.setup({
+      key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || 'pk_test_your_key_here',
+      email: user?.email || '',
+      amount: totalAmount,
+      currency: 'GHS',
+      firstname: deliveryDetails.fullName.split(' ')[0],
+      lastname: deliveryDetails.fullName.split(' ').slice(1).join(' '),
+      phone: deliveryDetails.phone,
+      metadata: {
+        custom_fields: [
+          {
+            display_name: "Cart Items",
+            variable_name: "cart_items",
+            value: JSON.stringify(cartItems.map(item => ({
+              id: item.id,
+              name: item.name,
+              quantity: item.quantity,
+              price: item.price
+            })))
+          },
+          {
+            display_name: "Delivery Address",
+            variable_name: "delivery_address",
+            value: JSON.stringify(deliveryDetails)
+          }
+        ]
+      },
+      callback: function(response: { reference: string }) {
+        console.log('Payment successful:', response);
+        
+        localStorage.setItem(`delivery_${user?.email}`, JSON.stringify(deliveryDetails));
+        clearCart();
+        
+        toast({
+          title: "Payment Successful!",
+          description: `Your order has been placed. Reference: ${response.reference}`,
+        });
+        
+        router.push(`/order-success?ref=${response.reference}`);
+        setIsLoading(false);
+      },
+      onClose: function() {
+        toast({
+          title: "Payment Cancelled",
+          description: "Your payment was cancelled. Your cart is still available.",
+        });
+        setIsLoading(false);
+      }
+    });
+
+    handler.openIframe();
+  };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-      <div className="lg:col-span-2">
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <Card className="shadow-lg rounded-lg overflow-hidden">
-              <CardHeader className="bg-gray-50">
-                <CardTitle className="text-xl">Shipping Information</CardTitle>
-                <CardDescription>
-                  Enter your shipping address.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="pt-6 space-y-4">
-                <FormField
-                  control={form.control}
-                  name="fullName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Full Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="John M. Doe" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="addressLine1"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Address Line 1</FormLabel>
-                      <FormControl>
-                        <Input placeholder="123 Marine Drive" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="addressLine2"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Address Line 2 (Optional)</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Apartment, suite, unit, building, floor, etc."
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="city"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>City</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Seaport City" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {/* Delivery Information */}
+      <div className="lg:col-span-2 space-y-6">
+        <Card className="border-gray-200">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Truck className="h-5 w-5 text-gray-600" />
+                <CardTitle className="text-black">Delivery Information</CardTitle>
+              </div>
+              {hasProfileAddress && !editingAddress && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setEditingAddress(true)}
+                  className="text-black border-gray-300 hover:bg-gray-50"
+                >
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit
+                </Button>
+              )}
+            </div>
+            <CardDescription className="text-gray-600">
+              {hasProfileAddress && !editingAddress 
+                ? "Using your saved delivery address"
+                : "Enter your delivery details"
+              }
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {!editingAddress && hasProfileAddress ? (
+              <div className="bg-gray-50 p-4 rounded-lg space-y-3">
+                <div className="flex items-center space-x-2">
+                  <User className="h-4 w-4 text-gray-600" />
+                  <span className="font-medium text-black">{deliveryDetails.fullName}</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Phone className="h-4 w-4 text-gray-600" />
+                  <span className="text-gray-700">{deliveryDetails.phone}</span>
+                </div>
+                <div className="flex items-start space-x-2">
+                  <MapPin className="h-4 w-4 text-gray-600 mt-0.5" />
+                  <div className="text-gray-700">
+                    {deliveryDetails.gpsAddress && <p>GPS: {deliveryDetails.gpsAddress}</p>}
+                    {deliveryDetails.landmark && <p>Near: {deliveryDetails.landmark}</p>}
+                    <p>{deliveryDetails.area}, {deliveryDetails.city}</p>
+                    <p>{deliveryDetails.region}, Ghana</p>
+                    {deliveryDetails.additionalDirections && (
+                      <p className="text-sm text-gray-600 mt-1">{deliveryDetails.additionalDirections}</p>
                     )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="postalCode"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Postal Code</FormLabel>
-                        <FormControl>
-                          <Input placeholder="90210" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="fullName">Full Name *</Label>
+                    <Input
+                      id="fullName"
+                      value={deliveryDetails.fullName}
+                      onChange={(e) => setDeliveryDetails(prev => ({ ...prev, fullName: e.target.value }))}
+                      placeholder="John Doe"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Phone Number *</Label>
+                    <Input
+                      id="phone"
+                      value={deliveryDetails.phone}
+                      onChange={(e) => setDeliveryDetails(prev => ({ ...prev, phone: e.target.value }))}
+                      placeholder="+233 24 123 4567"
+                      required
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="gpsAddress">GPS Address</Label>
+                  <Input
+                    id="gpsAddress"
+                    value={deliveryDetails.gpsAddress}
+                    onChange={(e) => setDeliveryDetails(prev => ({ ...prev, gpsAddress: e.target.value }))}
+                    placeholder="GA-123-4567"
                   />
                 </div>
-                <FormField
-                  control={form.control}
-                  name="country"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Country</FormLabel>
-                      <FormControl>
-                        <Input placeholder="United States" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="phoneNumber"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Phone Number (Optional)</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="tel"
-                          placeholder="(555) 123-4567 for delivery updates"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-            </Card>
-
-            <Card className="shadow-lg rounded-lg overflow-hidden">
-              <CardHeader className="bg-gray-50">
-                <CardTitle className="text-xl">Payment Details</CardTitle>
-                <CardDescription>
-                  Enter your payment information. This is a mock payment for
-                  demonstration purposes.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="pt-6 space-y-4">
-                <FormField
-                  control={form.control}
-                  name="cardNumber"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Card Number</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="•••• •••• •••• ••••"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="expiryDate"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Expiry Date</FormLabel>
-                        <FormControl>
-                          <Input placeholder="MM/YY" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="cvc"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>CVC</FormLabel>
-                        <FormControl>
-                          <Input placeholder="123" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                
+                <div className="space-y-2">
+                  <Label htmlFor="landmark">Landmark</Label>
+                  <Input
+                    id="landmark"
+                    value={deliveryDetails.landmark}
+                    onChange={(e) => setDeliveryDetails(prev => ({ ...prev, landmark: e.target.value }))}
+                    placeholder="Near Accra Mall"
                   />
                 </div>
-              </CardContent>
-            </Card>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="area">Area *</Label>
+                    <Input
+                      id="area"
+                      value={deliveryDetails.area}
+                      onChange={(e) => setDeliveryDetails(prev => ({ ...prev, area: e.target.value }))}
+                      placeholder="East Legon"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="city">City *</Label>
+                    <Input
+                      id="city"
+                      value={deliveryDetails.city}
+                      onChange={(e) => setDeliveryDetails(prev => ({ ...prev, city: e.target.value }))}
+                      placeholder="Accra"
+                      required
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="region">Region</Label>
+                  <select
+                    id="region"
+                    value={deliveryDetails.region}
+                    onChange={(e) => setDeliveryDetails(prev => ({ ...prev, region: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                  >
+                    <option value="Greater Accra">Greater Accra</option>
+                    <option value="Ashanti">Ashanti</option>
+                    <option value="Western">Western</option>
+                    <option value="Central">Central</option>
+                    <option value="Eastern">Eastern</option>
+                    <option value="Northern">Northern</option>
+                  </select>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="additionalDirections">Additional Directions</Label>
+                  <Textarea
+                    id="additionalDirections"
+                    value={deliveryDetails.additionalDirections}
+                    onChange={(e) => setDeliveryDetails(prev => ({ ...prev, additionalDirections: e.target.value }))}
+                    placeholder="Turn left after the traffic light, white gate with blue doors..."
+                    rows={3}
+                  />
+                </div>
+                
+                {hasProfileAddress && (
+                  <Button
+                    variant="outline"
+                    onClick={() => setEditingAddress(false)}
+                    className="w-full text-black border-gray-300 hover:bg-gray-50"
+                  >
+                    Use Saved Address
+                  </Button>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
+      {/* Order Summary */}
+      <div className="lg:col-span-1">
+        <Card className="border-gray-200 sticky top-4">
+          <CardHeader>
+            <div className="flex items-center space-x-2">
+              <Package className="h-5 w-5 text-gray-600" />
+              <CardTitle className="text-black">Order Summary</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-3">
+              {cartItems && cartItems.length > 0 ? cartItems.map((item) => (
+                <div key={item.id} className="flex justify-between items-center">
+                  <div>
+                    <p className="font-medium text-black">{item.name}</p>
+                    <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
+                  </div>
+                  <p className="font-medium text-black">₵{(item.price * item.quantity).toFixed(2)}</p>
+                </div>
+              )) : (
+                <p className="text-gray-500 text-center py-4">No items in cart</p>
+              )}
+            </div>
+            
+            <Separator />
+            
+            <div className="space-y-2">
+              <div className="flex justify-between text-gray-600">
+                <span>Subtotal</span>
+                <span>₵{getCartTotal().toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-gray-600">
+                <span>Delivery</span>
+                <span>₵15.00</span>
+              </div>
+              <Separator />
+              <div className="flex justify-between text-lg font-bold text-black">
+                <span>Total</span>
+                <span>₵{(getCartTotal() + 15).toFixed(2)}</span>
+              </div>
+            </div>
+            
             <Button
-              type="submit"
-              className="w-full bg-green-600 hover:bg-green-700 text-white cursor-pointer text-lg py-6 mt-6 rounded-md shadow-md"
-              disabled={isProcessing || getItemCount() === 0}
+              onClick={handlePayment}
+              disabled={isLoading}
+              className="w-full bg-black hover:bg-gray-800 text-white mt-6"
             >
-              {isProcessing ? (
+              {isLoading ? (
                 <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Processing
-                  Payment...
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Processing...
                 </>
               ) : (
                 <>
-                  <CreditCard className="mr-2 h-5 w-5" /> Place Order & Pay $
-                  {getCartTotal().toFixed(2)}
+                  <CreditCard className="mr-2 h-4 w-4" />
+                  Pay with Paystack
                 </>
               )}
             </Button>
-          </form>
-        </Form>
-      </div>
-
-      <div className="lg:col-span-1">
-        <Card className="shadow-lg rounded-lg sticky top-24">
-          <CardHeader className="bg-gray-50">
-            <CardTitle className="text-xl">Order Summary</CardTitle>
-            <CardDescription>
-              You have {getItemCount()} item(s) in your cart.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="pt-6 space-y-3 max-h-[400px] overflow-y-auto pr-2">
-            {cartItems.map((item) => (
-              <div
-                key={item.id}
-                className="flex justify-between items-start text-sm pb-3 border-b last:border-b-0"
-              >
-                <div className="flex-grow pr-2">
-                  <p className="font-medium leading-tight">{item.name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    Qty: {item.quantity}
-                  </p>
-                </div>
-                <p className="font-semibold whitespace-nowrap">
-                  ${(item.price * item.quantity).toFixed(2)}
-                </p>
-              </div>
-            ))}
+            
+            <p className="text-xs text-gray-500 text-center">
+              Secure payment powered by Paystack
+            </p>
           </CardContent>
-          <CardFooter className="flex justify-between items-center text-lg font-bold border-t pt-4 mt-4 bg-gray-50">
-            <span>Total:</span>
-            <span>${getCartTotal().toFixed(2)}</span>
-          </CardFooter>
         </Card>
       </div>
     </div>

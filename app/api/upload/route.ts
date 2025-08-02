@@ -27,14 +27,14 @@ export async function POST(request: NextRequest) {
             { format: 'auto' }
           ]
         },
-        (error: any, result: any) => {
+        (error: unknown, result: unknown) => {
           if (error) reject(error);
           else resolve(result);
         }
       ).end(buffer);
     });
 
-    const uploadResult = result as any;
+    const uploadResult = result as { secure_url: string; public_id: string; width: number; height: number };
 
     return NextResponse.json({
       success: true,

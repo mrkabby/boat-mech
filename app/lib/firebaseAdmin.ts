@@ -69,8 +69,9 @@ try {
     adminDbService = adminApp.firestore();
     
     console.log('✅ Firebase Admin SDK initialized successfully');
-  } catch (error: any) {
-    const initErrorMessage = 'Firebase Admin SDK initialization error: ' + (error.message || error);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const initErrorMessage = 'Firebase Admin SDK initialization error: ' + errorMessage;
     console.error('❌ Firebase Admin SDK initialization failed:', initErrorMessage);
     console.error('Error details:', error);
     throw new Error(initErrorMessage);
@@ -81,9 +82,10 @@ try {
   adminAuthService = adminApp.auth();
   adminDbService = adminApp.firestore();
 }
-} catch (globalError: any) {
+} catch (globalError: unknown) {
+  const errorMessage = globalError instanceof Error ? globalError.message : String(globalError);
   console.error('❌ Critical Firebase Admin SDK error:', globalError);
-  throw new Error(`Firebase Admin SDK failed to initialize: ${globalError.message}`);
+  throw new Error(`Firebase Admin SDK failed to initialize: ${errorMessage}`);
 }
 
 export const adminAuth = adminAuthService;

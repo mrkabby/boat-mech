@@ -77,7 +77,7 @@ export function LoginForm() {
   return (
     <Card className="w-full max-w-md shadow-xl">
       <CardHeader>
-        <CardTitle className="text-3xl font-bold text-center text-primary">Welcome Back!</CardTitle>
+        <CardTitle className="text-3xl font-bold text-center text-black">Welcome Back!</CardTitle>
         <CardDescription className="text-center">
           Enter your credentials to access your Boat Mech account.
         </CardDescription>
@@ -111,7 +111,7 @@ export function LoginForm() {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white cursor-pointer" disabled={isLoading}>
+            <Button type="submit" className="w-full bg-black hover:bg-gray-800 text-white cursor-pointer" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Log In
             </Button>
@@ -121,7 +121,7 @@ export function LoginForm() {
       <CardFooter className="flex flex-col items-center space-y-2">
         <p className="text-sm text-muted-foreground">
           Don&apos;t have an account?{" "}
-          <Button variant="link" asChild className="text-blue-600 p-0 h-auto cursor-pointer">
+          <Button variant="link" asChild className="text-black hover:text-gray-700 p-0 h-auto cursor-pointer">
             <Link href="/signup">Sign up</Link>
           </Button>
         </p>

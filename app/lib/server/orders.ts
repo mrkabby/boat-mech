@@ -36,7 +36,7 @@ export async function updateOrderStatus(
 ): Promise<void> {
   try {
     const orderRef = adminDb.collection('orders').doc(orderId);
-    const updateData: any = {
+    const updateData: { [key: string]: unknown } = {
       status,
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     };

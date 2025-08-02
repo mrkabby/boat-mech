@@ -15,10 +15,10 @@ export default function CartPage() {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
         <ShoppingCart className="h-24 w-24 text-muted-foreground mb-6" />
-        <h1 className="text-3xl font-bold text-primary mb-4">Your Cart is Empty</h1>
+        <h1 className="text-3xl font-bold text-black mb-4">Your Cart is Empty</h1>
         <p className="text-muted-foreground mb-8">Looks like you haven&apos;t added anything to your cart yet.</p>
-        <Button asChild size="lg" className="bg-blue-600 hover:bg-blue-700 text-white cursor-pointer">
-          <Link href="/">Start Shopping</Link>
+                <Button asChild size="lg" className="bg-black hover:bg-gray-800 text-white cursor-pointer">
+          <Link href="/shop">Continue Shopping</Link>
         </Button>
       </div>
     );
@@ -26,7 +26,7 @@ export default function CartPage() {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <h1 className="text-4xl font-bold text-primary mb-8 text-center">Your Shopping Cart</h1>
+      <h1 className="text-4xl font-bold text-black mb-8 text-center">Your Shopping Cart</h1>
       
       <Card className="shadow-xl">
         <CardHeader>
@@ -42,10 +42,10 @@ export default function CartPage() {
             Clear Cart
           </Button>
           <div className="text-right w-full md:w-auto">
-            <p className="text-2xl font-bold text-primary">
+            <p className="text-2xl font-bold text-black">
               Total: ${getCartTotal().toFixed(2)}
             </p>
-            <Button size="lg" asChild className="w-full md:w-auto mt-4 bg-green-600 hover:bg-green-700 text-white cursor-pointer">
+            <Button size="lg" asChild className="w-full md:w-auto mt-4 bg-black hover:bg-gray-800 text-white cursor-pointer">
               <Link href="/checkout">Proceed to Checkout</Link>
             </Button>
           </div>

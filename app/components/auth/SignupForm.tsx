@@ -68,7 +68,7 @@ export function SignupForm() {
   return (
     <Card className="w-full max-w-md shadow-xl">
       <CardHeader>
-        <CardTitle className="text-3xl font-bold text-center text-primary">Create Account</CardTitle>
+        <CardTitle className="text-3xl font-bold text-center text-black">Create Account</CardTitle>
         <CardDescription className="text-center">
           Join Boat Mech today to find the best marine parts.
         </CardDescription>
@@ -130,7 +130,7 @@ export function SignupForm() {
             />
             <Button 
               type="submit" 
-              className="w-full bg-green-600 hover:bg-green-700 text-white cursor-pointer" 
+              className="w-full bg-black hover:bg-gray-800 text-white cursor-pointer" 
               disabled={isLoading}
               suppressHydrationWarning={true}
             >
@@ -143,7 +143,7 @@ export function SignupForm() {
       <CardFooter className="flex flex-col items-center space-y-2">
         <p className="text-sm text-muted-foreground">
           Already have an account?{" "}
-          <Button variant="link" asChild className="text-blue-600 p-0 h-auto cursor-pointer">
+          <Button variant="link" asChild className="text-black hover:text-gray-700 p-0 h-auto cursor-pointer">
             <Link href="/login">Log in</Link>
           </Button>
         </p>

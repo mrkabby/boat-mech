@@ -58,10 +58,10 @@ export async function POST(req: NextRequest) {
       role
     }, { status: 200 });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error updating user role:', error);
     
-    if (error.code === 'auth/user-not-found') {
+    if (error && typeof error === 'object' && 'code' in error && error.code === 'auth/user-not-found') {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
     

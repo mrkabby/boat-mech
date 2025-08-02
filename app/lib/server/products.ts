@@ -19,6 +19,27 @@ export async function getProducts(): Promise<SerializedProduct[]> {
   const snapshot = await getDocs(q);
   return snapshot.docs.map((doc) => {
     const data = doc.data();
+    
+    // Handle timestamp conversion more safely
+    let createdAt = new Date();
+    let updatedAt = new Date();
+    
+    try {
+      if (data.createdAt) {
+        createdAt = (data.createdAt as Timestamp).toDate();
+      }
+    } catch (error) {
+      console.warn('Failed to convert createdAt timestamp for product:', doc.id, error);
+    }
+    
+    try {
+      if (data.updatedAt) {
+        updatedAt = (data.updatedAt as Timestamp).toDate();
+      }
+    } catch (error) {
+      console.warn('Failed to convert updatedAt timestamp for product:', doc.id, error);
+    }
+    
     return {
       id: doc.id,
       name: data.name,
@@ -30,9 +51,8 @@ export async function getProducts(): Promise<SerializedProduct[]> {
       stock: data.stock,
       rating: data.rating,
       reviews: data.reviews,
-      // Convert Firestore Timestamps to plain Date objects for serialization
-      createdAt: data.createdAt ? (data.createdAt as Timestamp).toDate() : new Date(),
-      updatedAt: data.updatedAt ? (data.updatedAt as Timestamp).toDate() : new Date(),
+      createdAt,
+      updatedAt,
     } as SerializedProduct;
   });
 }
@@ -47,6 +67,27 @@ export async function getProductById(id: string): Promise<SerializedProduct | nu
     }
     
     const data = docSnap.data();
+    
+    // Handle timestamp conversion more safely
+    let createdAt = new Date();
+    let updatedAt = new Date();
+    
+    try {
+      if (data.createdAt) {
+        createdAt = (data.createdAt as Timestamp).toDate();
+      }
+    } catch (error) {
+      console.warn('Failed to convert createdAt timestamp for product:', id, error);
+    }
+    
+    try {
+      if (data.updatedAt) {
+        updatedAt = (data.updatedAt as Timestamp).toDate();
+      }
+    } catch (error) {
+      console.warn('Failed to convert updatedAt timestamp for product:', id, error);
+    }
+    
     return {
       id: docSnap.id,
       name: data.name,
@@ -59,9 +100,8 @@ export async function getProductById(id: string): Promise<SerializedProduct | nu
       rating: data.rating,
       reviews: data.reviews,
       cloudinaryPublicId: data.cloudinaryPublicId,
-      // Convert Firestore Timestamps to plain Date objects for serialization
-      createdAt: data.createdAt ? (data.createdAt as Timestamp).toDate() : new Date(),
-      updatedAt: data.updatedAt ? (data.updatedAt as Timestamp).toDate() : new Date(),
+      createdAt,
+      updatedAt,
     } as SerializedProduct;
   } catch (error) {
     console.error('Error fetching product:', error);

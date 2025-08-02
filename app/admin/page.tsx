@@ -56,13 +56,13 @@ export default async function AdminDashboardPage() {
     <div className="space-y-8">
       <AdminStatusChecker />
       
-      <Card className="shadow-lg">
+      <Card className="shadow-lg border-gray-200">
         <CardHeader>
-          <CardTitle className="text-3xl font-bold text-primary">Admin Dashboard</CardTitle>
-          <CardDescription>Welcome to the Boat Mech administration panel. Manage your store here.</CardDescription>
+          <CardTitle className="text-3xl font-bold text-black">Admin Dashboard</CardTitle>
+          <CardDescription className="text-gray-600">Welcome to the Boat Mech administration panel. Manage your store here.</CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="mb-6">
+          <p className="mb-6 text-gray-700">
             From this dashboard, you can manage products, view orders, and oversee users.
             Use the navigation sidebar to access different sections.
           </p>
@@ -98,10 +98,10 @@ export default async function AdminDashboardPage() {
         </CardContent>
       </Card>
       
-      <Card className="shadow-md">
+      <Card className="shadow-md border-gray-200">
         <CardHeader>
-          <CardTitle>Quick Stats</CardTitle>
-          <CardDescription>Overview of your store&apos;s current performance.</CardDescription>
+          <CardTitle className="text-black">Quick Stats</CardTitle>
+          <CardDescription className="text-gray-600">Overview of your store&apos;s current performance.</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -168,14 +168,14 @@ interface StatsCardProps {
 
 function DashboardActionCard({ title, description, href, icon: Icon, disabled }: DashboardActionCardProps) {
   return (
-    <Card className="hover:shadow-lg transition-shadow">
+    <Card className="hover:shadow-lg transition-shadow border-gray-200">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-lg font-medium">{title}</CardTitle>
-        <Icon className="h-6 w-6 text-muted-foreground" />
+        <CardTitle className="text-lg font-medium text-black">{title}</CardTitle>
+        <Icon className="h-6 w-6 text-gray-600" />
       </CardHeader>
       <CardContent>
-        <p className="text-sm text-muted-foreground mb-4">{description}</p>
-        <Button asChild className="w-full" disabled={disabled}>
+        <p className="text-sm text-gray-600 mb-4">{description}</p>
+        <Button asChild className="w-full sm:w-auto bg-black hover:bg-gray-800 text-white px-4 py-2 text-sm" disabled={disabled}>
           <Link href={href}>{title}</Link>
         </Button>
       </CardContent>
@@ -185,14 +185,14 @@ function DashboardActionCard({ title, description, href, icon: Icon, disabled }:
 
 function StatsCard({ title, value, icon: Icon, description, alert }: StatsCardProps) {
   return (
-    <Card className={`${alert ? 'border-orange-200 bg-orange-50' : ''}`}>
+    <Card className={`border-gray-200 ${alert ? 'border-orange-200 bg-orange-50' : 'bg-white'}`}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        <Icon className={`h-4 w-4 ${alert ? 'text-orange-600' : 'text-muted-foreground'}`} />
+        <CardTitle className="text-sm font-medium text-black">{title}</CardTitle>
+        <Icon className={`h-4 w-4 ${alert ? 'text-orange-600' : 'text-gray-600'}`} />
       </CardHeader>
       <CardContent>
-        <div className={`text-2xl font-bold ${alert ? 'text-orange-600' : ''}`}>{value}</div>
-        <p className={`text-xs ${alert ? 'text-orange-600' : 'text-muted-foreground'}`}>
+        <div className={`text-2xl font-bold ${alert ? 'text-orange-600' : 'text-black'}`}>{value}</div>
+        <p className={`text-xs ${alert ? 'text-orange-600' : 'text-gray-600'}`}>
           {description}
         </p>
       </CardContent>

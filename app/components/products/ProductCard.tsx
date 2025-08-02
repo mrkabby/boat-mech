@@ -38,7 +38,7 @@ export function ProductCard({ product }: ProductCardProps) {
         </Link>
         <CardDescription className="text-sm text-muted-foreground mb-2 line-clamp-2">{product.description}</CardDescription>
         <div className="flex items-center justify-between mb-2">
-          <p className="text-xl font-bold text-primary">${product.price.toFixed(2)}</p>
+          <p className="text-xl font-bold text-black">${product.price.toFixed(2)}</p>
           {product.rating && (
              <div className="flex items-center text-sm text-muted-foreground">
                <Star className="h-4 w-4 fill-accent text-accent mr-1" />
@@ -64,7 +64,7 @@ export function ProductCard({ product }: ProductCardProps) {
             </Link>
           </Button>
           <Button 
-            className="flex-1 min-w-0 bg-blue-600 hover:bg-blue-700 text-white" 
+            className="flex-1 min-w-0 bg-black hover:bg-gray-800 text-white" 
             size="sm"
             onClick={() => addToCart(product)}
             disabled={product.stock === 0}

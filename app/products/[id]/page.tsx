@@ -190,18 +190,6 @@ export default async function ProductPage({
                 <span className="text-gray-600">Stock:</span>
                 <span className="font-medium">{product.stock} units</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Added:</span>
-                <span className="font-medium">
-                  {new Date(product.createdAt).toLocaleDateString()}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Last Updated:</span>
-                <span className="font-medium">
-                  {new Date(product.updatedAt).toLocaleDateString()}
-                </span>
-              </div>
             </CardContent>
           </Card>
         </div>
