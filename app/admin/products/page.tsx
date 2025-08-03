@@ -1,6 +1,6 @@
 
 import type { Metadata } from 'next';
-import { ProductList } from '../../components/products/ProductList'; // Reusing ProductList for admin view
+import { AdminProductList } from '../../components/admin/AdminProductList';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import Link from 'next/link';
@@ -14,27 +14,20 @@ export const metadata: Metadata = {
 export default function ManageProductsPage() {
   return (
     <div className="space-y-6">
-      <Card className="shadow-lg">
+      <Card className="shadow-lg border-gray-200">
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <CardTitle className="text-2xl font-bold text-primary">Manage Products</CardTitle>
-            <CardDescription>Browse and manage your product catalog.</CardDescription>
+            <CardTitle className="text-2xl font-bold text-black">Manage Products</CardTitle>
+            <CardDescription className="text-gray-600">Browse, edit, and manage your product catalog.</CardDescription>
           </div>
-          <Button asChild>
+          <Button asChild className="bg-black hover:bg-gray-800 text-white">
             <Link href="/admin/products/new">
               <Plus className="mr-2 h-4 w-4" /> Add New Product
             </Link>
           </Button>
         </CardHeader>
         <CardContent>
-          {/* 
-            Future enhancements for admin product list:
-            - Edit button for each product
-            - Delete button for each product (with confirmation)
-            - More detailed view (e.g., stock, SKU)
-            - Admin-specific filters or sorting
-          */}
-          <ProductList />
+          <AdminProductList />
         </CardContent>
       </Card>
     </div>

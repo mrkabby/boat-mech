@@ -45,7 +45,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen bg-muted/30">
       <AdminSidebar />
-      <main className="flex-1 p-6 lg:p-8">
+      <main className="flex-1 p-6 lg:p-8 lg:pl-8 pl-16"> {/* Add left padding for mobile hamburger */}
         {children}
         {/* <Toaster />  The global Toaster in AppProviders (RootLayout) handles toasts */}
       </main>
